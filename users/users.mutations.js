@@ -50,6 +50,13 @@ export default {
           error: 'user not found',
         };
       }
+      const passwordOk = await bcrypt.compare(password, user.password);
+      if (!passwordOk) {
+        return {
+          ok: false,
+          error: 'password incorrect',
+        };
+      }
     },
   },
 };
