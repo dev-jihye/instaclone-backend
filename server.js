@@ -10,7 +10,7 @@ const startServer = async () => {
   const app = express();
   app.use(graphqlUploadExpress());
 
-  const server = new ApolloServer({
+  const apollo = new ApolloServer({
     resolvers,
     typeDefs,
     context: async ({ req }) => {
@@ -20,11 +20,11 @@ const startServer = async () => {
       };
     },
   });
-  await server.start();
-  server.applyMiddleware({ app });
+  await apollo.start();
+  apollo.applyMiddleware({ app });
   await new Promise((resolve) => app.listen({ port: PORT }, resolve));
   console.log(
-    `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+    `🚀 Server ready at http://localhost:${PORT}${apollo.graphqlPath}`
   );
 };
 
