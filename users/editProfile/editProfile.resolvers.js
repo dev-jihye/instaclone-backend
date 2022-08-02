@@ -1,11 +1,12 @@
 import bcrypt from 'bcrypt';
 import client from '../../client.js';
 import { protectResolver } from '../users.utils.js';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 
 const resolverFn = async (
   _,
-  { firstName, lastName, username, email, password: newPassword },
-  { loggedInUser, protectResolver }
+  { firstName, lastName, username, email, password: newPassword, bio },
+  { loggedInUser }
 ) => {
   let uglyPassword = null;
   if (newPassword) {
@@ -20,6 +21,7 @@ const resolverFn = async (
       lastName,
       username,
       email,
+      bio,
       password: uglyPassword ? uglyPassword : newPassword,
     },
   });
@@ -39,4 +41,5 @@ export default {
   Mutation: {
     editProfile: protectResolver(resolverFn),
   },
+  Upload: GraphQLUpload,
 };
