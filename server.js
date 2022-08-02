@@ -10,6 +10,7 @@ const PORT = process.env.PORT;
 const startServer = async () => {
   const app = express();
   app.use(logger('dev'));
+  app.use('/static', express.static('uploads'));
   app.use(graphqlUploadExpress());
 
   const apollo = new ApolloServer({
