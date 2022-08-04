@@ -16,8 +16,6 @@ export default gql`
     totalFollowing: Int!
     totalFollowers: Int!
     isSelf: Boolean!
+    isFollowing: Boolean!
   }
 `;
-
-// user 로그인이 필수
-// isFollowing: Boolean!
