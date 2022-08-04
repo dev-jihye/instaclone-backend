@@ -13,5 +13,11 @@ export default gql`
     avatar: String
     following: [User]
     followers: [User]
+    totalFollowing: Int!
+    totalFollowers: Int!
   }
 `;
+
+// user 로그인이 필수
+// isFollowing: Boolean!
+// isSelf: Boolean!
