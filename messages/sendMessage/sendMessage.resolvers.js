@@ -36,7 +36,7 @@ export default {
             },
           });
         } else if (roomId) {
-          room = await client.findUnique({
+          room = await client.room.findUnique({
             where: {
               id: roomId,
             },
