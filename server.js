@@ -3,7 +3,7 @@ import express from 'express';
 import logger from 'morgan';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './schema';
-import { getUser, protectResolver } from './users/users.utils';
+import { getUser } from './users/users.utils';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { createServer } from 'http';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -23,35 +23,49 @@ const startServer = async () => {
 
   const httpServer = createServer(app);
   const schema = makeExecutableSchema({ typeDefs, resolvers });
-  // const server = new ApolloServer({
-  //   schema,
-  //   csrfPrevention: true,
-  //   cache: 'bounded',
-  //   // plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
-  // });
 
-  // Creating the WebSocket server
   const wsServer = new WebSocketServer({
-    // This is the `httpServer` we created in a previous step.
     server: httpServer,
-    // Pass a different path here if your ApolloServer serves at
-    // a different path.
     path: '/graphql',
   });
 
-  // Hand in the schema we just created and have the
-  // WebSocketServer start listening.
-  const serverCleanup = useServer({ schema }, wsServer);
+  const getDynamicContext = async (ctx) => {
+    const { token } = ctx.connectionParams;
+    if (token) {
+      return {
+        loggedInUser: await getUser(token),
+      };
+    }
+    return { loggedInUser: null };
+  };
+
+  const serverCleanup = useServer(
+    {
+      schema,
+      context: (ctx, msg, args) => getDynamicContext(ctx, msg, args),
+    },
+    wsServer
+  );
 
   const apollo = new ApolloServer({
     resolvers,
     typeDefs,
-    context: async ({ req }) => {
-      if (req) {
+    csrfPrevention: true,
+    cache: 'bounded',
+    context: async (ctx) => {
+      if (ctx.req) {
         return {
-          loggedInUser: await getUser(req.headers.token),
+          loggedInUser: await getUser(ctx.req.headers.token),
         };
       }
+      // else {
+      //   const {
+      //     connection: { context: wsContext },
+      //   } = ctx;
+      //   return {
+      //     loggedInUser: wsContext.loggedInUser,
+      //   };
+      // }
     },
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
